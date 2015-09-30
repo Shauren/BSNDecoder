@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Protocol.h" />
+    <ClInclude Include="ByteConverter.h" />
+    <ClInclude Include="Meta.h" />
+    <ClInclude Include="Type.h" />
+    <ClInclude Include="Walker.h" />
+    <ClInclude Include="StructureDumpingVisitor.h" />
+    <ClInclude Include="ProcessTools\Cache.h">
+      <Filter>ProcessTools</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessTools\ProcessTools.h">
+      <Filter>ProcessTools</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Protocol.cpp" />
+    <ClCompile Include="Meta.cpp" />
+    <ClCompile Include="Type.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="StructureDumpingVisitor.cpp" />
+    <ClCompile Include="ProcessTools\ProcessTools.cpp">
+      <Filter>ProcessTools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ProcessTools">
+      <UniqueIdentifier>{0adaf98b-fd83-41e9-a074-3f9eff184e6e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
