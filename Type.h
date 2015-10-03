@@ -17,8 +17,18 @@ namespace BSN
                 static void Get(bool a1, std::uint8_t const*& typeInfo, Bounds& result);
 
                 bool IsUnsigned() const { return dword0 & 1; }
-                std::string FormatMin() const;
-                std::string FormatMax() const;
+                std::string MinStr() const
+                {
+                    if (IsUnsigned())
+                        return std::to_string(Min);
+                    return std::to_string((std::int64_t)Min);
+                }
+                std::string MaxStr() const
+                {
+                    if (IsUnsigned())
+                        return std::to_string(Max);
+                    return std::to_string((std::int64_t)Max);
+                }
 
                 std::uint32_t dword0;
                 std::uint64_t Bits;
@@ -29,7 +39,8 @@ namespace BSN
 
             struct Int
             {
-                static void GetSize(std::uint8_t const*& typeInfo, std::uint32_t& result);
+                static void GetSize(std::uint8_t const*& typeInfo, std::size_t& result);
+                static void Get(std::uint32_t typeFlags, std::uint8_t const*& typeInfo, std::size_t& result);
             };
 
             void GetTypeId(std::uint8_t const*& typeInfo, std::uint32_t& typeId);

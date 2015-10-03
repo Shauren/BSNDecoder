@@ -3,7 +3,11 @@
 
 std::uint32_t StructureDumpingVisitor::VisitArray(BSN::Protocol::Meta::Array const& t, Context const& ctx)
 {
-    _result << Pad() << "[" << t._bounds.Min << ',' << t._bounds.Max << "]: {" << std::endl;
+    _result << Pad() << "Array " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.MaxStr() << ", lengthBits: " << t._bounds.Bits;
+    if (t._bounds.Min)
+        _result << ", length += " << t._bounds.MinStr();
+
+    _result << "]: {" << std::endl;
     Context userCtx;
     userCtx._protocol = ctx.GetProtocol();
     userCtx._typeId = t._underlyingType;
@@ -14,19 +18,44 @@ std::uint32_t StructureDumpingVisitor::VisitArray(BSN::Protocol::Meta::Array con
 
 std::uint32_t StructureDumpingVisitor::VisitAsciiString(BSN::Protocol::Meta::AsciiString const& t, Context const& ctx)
 {
-    _result << Pad() << "AsciiString " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.Min << ',' << t._bounds.Max << "]: {" << std::endl;
+    _result << Pad() << "AsciiString " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.MaxStr() << ", lengthBits: " << t._bounds.Bits;
+    if (t._bounds.Min)
+        _result << ", length += " << t._bounds.MinStr();
+    _result << "]" << std::endl;
     return 0;
 }
 
 std::uint32_t StructureDumpingVisitor::VisitBitArray(BSN::Protocol::Meta::BitArray const& t, Context const& ctx)
 {
-    _result << Pad() << "BitArray " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.Min << ',' << t._bounds.Max << "]: {" << std::endl;
+    _result << Pad() << "BitArray " << t._protocol->DumpString(t._dumpInfo, 0);
+    if (t._typeIndex & 0x80)
+    {
+        _result << "[" << t._bounds.Bits << "]" << std::endl;
+    }
+    else
+    {
+        _result << "[" << t._bounds.MaxStr() << ", lengthBits: " << t._bounds.Bits;
+        if (t._bounds.Min)
+            _result << ", length += " << t._bounds.MinStr();
+        _result << "]" << std::endl;
+    }
     return 0;
 }
 
 std::uint32_t StructureDumpingVisitor::VisitBlob(BSN::Protocol::Meta::Blob const& t, Context const& ctx)
 {
-    _result << Pad() << "Blob " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.Min << ',' << t._bounds.Max << "]: {" << std::endl;
+    _result << Pad() << "Blob " << t._protocol->DumpString(t._dumpInfo, 0);
+    if (t._typeIndex & 0x80)
+    {
+        _result << "[" << t._bounds.Bits << "]" << std::endl;
+    }
+    else
+    {
+        _result << "[" << t._bounds.MaxStr() << ", lengthBits: " << t._bounds.Bits;
+        if (t._bounds.Min)
+            _result << ", length += " << t._bounds.MinStr();
+        _result << "]" << std::endl;
+    }
     return 0;
 }
 
@@ -44,7 +73,7 @@ std::uint32_t StructureDumpingVisitor::VisitChoice(BSN::Protocol::Meta::Choice c
     ++_indent;
     while (t.GetFieldTypeId(i, memberTypeId))
     {
-        _result << Pad() << t._protocol->DumpString(t._dumpInfo, i + 1) << ": {" << std::endl;
+        _result << Pad() << t._protocol->DumpString(t._dumpInfo, i + 1) << " (" << t._indexes[i] << "): {" << std::endl;
         Context userCtx;
         userCtx._protocol = ctx.GetProtocol();
         userCtx._typeId = memberTypeId;
@@ -59,13 +88,12 @@ std::uint32_t StructureDumpingVisitor::VisitChoice(BSN::Protocol::Meta::Choice c
 
 std::uint32_t StructureDumpingVisitor::VisitEnum(BSN::Protocol::Meta::Enum const& t, Context const& ctx)
 {
-    _result << Pad() << "Enum " << t._protocol->DumpString(t._dumpInfo, 0) << ": {" << std::endl;
+    _result << Pad() << "Enum " << t._protocol->DumpString(t._dumpInfo, 0) << "[bits: " << t._bounds.Bits << "]: {" << std::endl;
     std::uint32_t i = 0;
-    std::uint32_t memberTypeId;
     ++_indent;
     while (i < t._size)
     {
-        _result << Pad() << t._protocol->DumpString(t._dumpInfo, i + 1) << " = " << i << std::endl;
+        _result << Pad() << t._protocol->DumpString(t._dumpInfo, i + 1) << " = " << t._indexes[i] << ", // 0x" << std::hex << t._indexes[i] << std::dec << std::endl;
         ++i;
     }
     --_indent;
@@ -81,7 +109,7 @@ std::uint32_t StructureDumpingVisitor::VisitFourCC(BSN::Protocol::Meta::FourCC c
 
 std::uint32_t StructureDumpingVisitor::VisitInt(BSN::Protocol::Meta::Int const& t, Context const& ctx)
 {
-    _result << Pad() << "Int " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.Min << ':' << t._bounds.Max << ", bits: " << t._bounds.Bits << "]" << std::endl;
+    _result << Pad() << "Int " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._bounds.MinStr() << ':' << t._bounds.MaxStr() << ", bits: " << t._bounds.Bits << "]" << std::endl;
     return 0;
 }
 
@@ -138,18 +166,28 @@ std::uint32_t StructureDumpingVisitor::VisitStruct(BSN::Protocol::Meta::Struct c
 
 std::uint32_t StructureDumpingVisitor::VisitString(BSN::Protocol::Meta::String const& t, Context const& ctx)
 {
-    _result << Pad() << "String " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._characterBounds.Min << ',' << t._characterBounds.Max << "]: {" << std::endl;
+    _result << Pad() << "String " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._characterBounds.MinStr() << ',' << t._characterBounds.MaxStr() << "]" << std::endl;
     return 0;
 }
 
 std::uint32_t StructureDumpingVisitor::VisitUser(BSN::Protocol::Meta::User const& t, Context const& ctx)
 {
-    _result << Pad() << t._protocol->DumpString(t._dumpInfo, 0) << ": {" << std::endl;
+    char const* name = t._protocol->DumpString(t._dumpInfo, 0);
+    if (*name)
+        _result << Pad() << t._protocol->DumpString(t._dumpInfo, 0) << ": {" << std::endl;
+
     Context userCtx;
     userCtx._protocol = ctx.GetProtocol();
     userCtx._typeId = t._underlyingType;
-    std::uint32_t result = RecurseWalk(userCtx);
-    _result << Pad() << "}" << std::endl;
+    std::uint32_t result;
+    if (*name)
+        result = RecurseWalk(userCtx);
+    else
+        result = BSN::Protocol::Meta::Walker::Walk(*this, userCtx); // skip extra indent if not named
+
+    if (*name)
+        _result << Pad() << "}" << std::endl;
+
     return result;
 }
 

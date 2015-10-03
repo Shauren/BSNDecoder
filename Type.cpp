@@ -89,17 +89,7 @@ void BSN::Protocol::Type::Bounds::Get(bool a1, std::uint8_t const*& typeInfo, Bo
     }
 }
 
-std::string BSN::Protocol::Type::Bounds::FormatMin() const
-{
-
-}
-
-std::string BSN::Protocol::Type::Bounds::FormatMax() const
-{
-
-}
-
-void BSN::Protocol::Type::Int::GetSize(std::uint8_t const*& typeInfo, std::uint32_t& result)
+void BSN::Protocol::Type::Int::GetSize(std::uint8_t const*& typeInfo, std::size_t& result)
 {
     std::uint8_t const* v4; // rax@3
     std::uint32_t v5; // rcx@3
@@ -122,6 +112,34 @@ void BSN::Protocol::Type::Int::GetSize(std::uint8_t const*& typeInfo, std::uint3
         ++v4;
         --size;
     } while (size);
+}
+
+void BSN::Protocol::Type::Int::Get(std::uint32_t typeFlags, std::uint8_t const*& typeInfo, std::size_t& result)
+{
+    signed __int64 v3; // r9@1
+    unsigned __int8 const *v4; // rcx@1
+    unsigned __int8 v5; // r8@1
+    signed __int64 v6; // rdi@3
+    unsigned __int8 const *v7; // rcx@3
+    signed __int64 v8; // rdi@4
+
+    v3 = 1LL << (typeFlags >> 1);
+    v4 = typeInfo;
+    v5 = 0;
+    if (!(typeFlags & 1))
+        v5 = *v4 >> 7;
+
+    v6 = (signed __int64)((unsigned __int64)v5 << 63) >> 63;
+    v7 = v4 + 1;
+    do
+    {
+        v8 = v6 << 8;
+        typeInfo = v7;
+        v6 = *(v7 - 1) | (unsigned __int64)v8;
+        result = v6;
+        ++v7;
+        --v3;
+    } while (v3);
 }
 
 void BSN::Protocol::Type::GetTypeId(std::uint8_t const*& typeInfo, std::uint32_t& typeId)

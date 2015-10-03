@@ -2,6 +2,7 @@
 #define Meta_h__
 
 #include "Type.h"
+#include <vector>
 #include <cstdint>
 #include <cstddef>
 
@@ -84,15 +85,29 @@ namespace BSN
                 {
                     Type::Bounds::Get(false, _typeInfo, _bounds);
                     if (_typeIndex & 0x80)
+                    {
                         _size = _bounds.Max - _bounds.Min + 1;
+                        _indexes.resize(_size);
+                        for (std::size_t i = 0; i < _size; ++i)
+                            _indexes[i] = i + _bounds.Min;
+                    }
                     else
+                    {
                         Type::Int::GetSize(_typeInfo, _size);
+                        _indexes.resize(_size);
+                        for (std::size_t i = 0; i < _size; ++i)
+                        {
+                            std::uint8_t const* typeInfo = &_typeInfo[i << (_bounds.dword0 >> 1)];
+                            Type::Int::Get(_bounds.dword0, typeInfo, _indexes[i]);
+                        }
+                    }
                 }
 
                 bool GetFieldTypeId(std::size_t index, std::uint32_t& memberTypeId) const;
 
                 Type::Bounds _bounds;
-                std::uint32_t _size;
+                std::size_t _size;
+                std::vector<std::size_t> _indexes;
             };
 
             struct Enum : public Base
@@ -102,13 +117,27 @@ namespace BSN
                 {
                     Type::Bounds::Get(false, _typeInfo, _bounds);
                     if (_typeIndex & 0x80)
+                    {
                         _size = _bounds.Max - _bounds.Min + 1;
+                        _indexes.resize(_size);
+                        for (std::size_t i = 0; i < _size; ++i)
+                            _indexes[i] = i + _bounds.Min;
+                    }
                     else
+                    {
                         Type::Int::GetSize(_typeInfo, _size);
+                        _indexes.resize(_size);
+                        for (std::size_t i = 0; i < _size; ++i)
+                        {
+                            std::uint8_t const* typeInfo = &_typeInfo[i << (_bounds.dword0 >> 1)];
+                            Type::Int::Get(_bounds.dword0, typeInfo, _indexes[i]);
+                        }
+                    }
                 }
 
                 Type::Bounds _bounds;
-                std::uint32_t _size;
+                std::size_t _size;
+                std::vector<std::size_t> _indexes;
             };
 
             struct FourCC : public Base
@@ -175,7 +204,7 @@ namespace BSN
                 bool GetMember(std::size_t index, std::size_t&, std::uint32_t& memberTypeId) const;
 
                 Type::Bounds _bounds;
-                std::uint32_t _size;
+                std::size_t _size;
             };
 
             struct String : public Base
