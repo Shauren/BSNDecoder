@@ -45,10 +45,12 @@ bool BSN::Protocol::Meta::Choice::GetFieldTypeId(std::size_t index, std::uint32_
 
 bool BSN::Protocol::Meta::Struct::GetMember(std::size_t index, std::size_t& a2, std::uint32_t& memberTypeId) const
 {
-    if (index >= _size || !_20)
+    if (index >= _size)
         return false;
 
-    a2 = _20[index + 1];
+    if (_20)
+        a2 = _20[index + 1];
+
     if (_typeIndex & 0x80)
     {
         std::uint8_t const* v8 = &_typeInfo[4 * index];

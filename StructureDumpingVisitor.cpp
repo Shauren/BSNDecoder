@@ -67,7 +67,7 @@ std::uint32_t StructureDumpingVisitor::VisitBool(BSN::Protocol::Meta::Bool const
 
 std::uint32_t StructureDumpingVisitor::VisitChoice(BSN::Protocol::Meta::Choice const& t, Context const& ctx)
 {
-    _result << Pad() << "Choice " << t._protocol->DumpString(t._dumpInfo, 0) << ": {" << std::endl;
+    _result << Pad() << "Choice " << t._protocol->DumpString(t._dumpInfo, 0) << "[type bits: " << t._bounds.Bits << "]: {" << std::endl;
     std::uint32_t i = 0;
     std::uint32_t memberTypeId;
     ++_indent;
@@ -166,7 +166,10 @@ std::uint32_t StructureDumpingVisitor::VisitStruct(BSN::Protocol::Meta::Struct c
 
 std::uint32_t StructureDumpingVisitor::VisitString(BSN::Protocol::Meta::String const& t, Context const& ctx)
 {
-    _result << Pad() << "String " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._characterBounds.MinStr() << ',' << t._characterBounds.MaxStr() << "]" << std::endl;
+    _result << Pad() << "String (utf-8) " << t._protocol->DumpString(t._dumpInfo, 0) << "[" << t._byteBounds.MaxStr() << ", byteLengthBits: " << t._byteBounds.Bits;
+    if (t._byteBounds.Min)
+        _result << ", byteLength += " << t._byteBounds.MinStr();
+    _result << ", max " << t._characterBounds.MaxStr() << " characters]" << std::endl;
     return 0;
 }
 
